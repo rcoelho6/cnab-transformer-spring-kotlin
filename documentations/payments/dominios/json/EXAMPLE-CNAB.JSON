@@ -1,0 +1,114 @@
+{
+  "file": {
+    "header": {
+      "bankCode": "033",
+      "fileDate": "2026-03-10",
+      "layoutVersion": "240"
+    },
+    "batches": [
+      {
+        "header": { "batchNumber": 1, "serviceType": "C", "companyId": "12345678000199" },
+        "paymentType": "PIX",
+        "details": [
+          {
+            "recordSeq": 1,
+            "segment": "T",
+            "paymentType": "PIX",
+            "amount": 5000,
+            "valueDate": "2026-03-10",
+            "payer": { "name": "Sicrano", "document": "22233344455" },
+            "extra": { "pixKey": "fulano@bank.com" },
+            "requestId": "pix-0001"
+          }
+        ],
+        "trailer": { "detailCount": 1 }
+      },
+      {
+        "header": { "batchNumber": 2, "serviceType": "C", "companyId": "12345678000199" },
+        "paymentType": "BOLETO",
+        "details": [
+          {
+            "recordSeq": 1,
+            "segment": "P",
+            "paymentType": "BOLETO",
+            "amount": 12345,
+            "dueDate": "2026-03-20",
+            "payer": { "name": "Fulano de Tal", "document": "12345678901" },
+            "extra": { "ourNumber": "000123", "documentNumber": "INV-1001", "barcode": "21290001192110010091100000001234500000012345" },
+            "requestId": "boleto-0001"
+          }
+        ],
+        "trailer": { "detailCount": 1 }
+      },
+      {
+        "header": { "batchNumber": 3, "serviceType": "C", "companyId": "12345678000199" },
+        "paymentType": "TED",
+        "details": [
+          {
+            "recordSeq": 1,
+            "segment": "T",
+            "paymentType": "TED",
+            "amount": 100000,
+            "valueDate": "2026-03-10",
+            "payer": { "name": "Empresa X", "document": "98765432000100" },
+            "extra": { "bankCode": "001", "agency": "01234", "account": "0000123456", "holderName":"Empresa X","holderDocument":"98765432000100" },
+            "requestId": "ted-0001"
+          }
+        ],
+        "trailer": { "detailCount": 1 }
+      },
+      {
+        "header": { "batchNumber": 4, "serviceType": "C", "companyId": "12345678000199" },
+        "paymentType": "TRIBUTE",
+        "details": [
+          {
+            "recordSeq": 1,
+            "segment": "T",
+            "paymentType": "TRIBUTE",
+            "amount": 50000,
+            "valueDate": "2026-03-15",
+            "payer": { "name": "Contribuinte Y", "document": "12345678000199" },
+            "extra": { "taxCode": "1500", "reference": "202602" },
+            "requestId": "tax-0001"
+          }
+        ],
+        "trailer": { "detailCount": 1 }
+      },
+      {
+        "header": { "batchNumber": 5, "serviceType": "C", "companyId": "12345678000199" },
+        "paymentType": "TAX_VEHICLE",
+        "details": [
+          {
+            "recordSeq": 1,
+            "segment": "T",
+            "paymentType": "TAX_VEHICLE",
+            "amount": 12345,
+            "valueDate": "2026-03-18",
+            "payer": { "name": "Proprietario Z", "document": "22233344455" },
+            "extra": { "vehicleId": "ABC1234", "taxCode": "IPVA" },
+            "requestId": "veh-0001"
+          }
+        ],
+        "trailer": { "detailCount": 1 }
+      },
+      {
+        "header": { "batchNumber": 6, "serviceType": "C", "companyId": "12345678000199" },
+        "paymentType": "DDA",
+        "details": [
+          {
+            "recordSeq": 1,
+            "segment": "P",
+            "paymentType": "DDA",
+            "amount": 54321,
+            "dueDate": "2026-03-25",
+            "payer": { "name": "Sacado Q", "document": "33344455566" },
+            "extra": { "nossoNumero": "000987", "titleNumber": "20260099" },
+            "requestId": "dda-0001"
+          }
+        ],
+        "trailer": { "detailCount": 1 }
+      }
+    ],
+    "trailer": { "batchCount": 6, "recordCount": 12 }
+  }
+}
