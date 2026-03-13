@@ -1,27 +1,39 @@
-# HTTP-BASE64 — Overview
+# HTTP-BASE64 — Visão Geral da Integração
 
-Descrição
-- Recebimento de arquivo CNAB via requisição HTTP POST com o conteúdo do arquivo codificado em Base64 no corpo JSON.
-- Aplicável quando o cliente tem capacidade de chamar APIs REST e prefere transporte via HTTPS.
+Este documento descreve o método de recebimento de arquivos CNAB via requisição **HTTP POST**, onde o conteúdo do arquivo é codificado em **Base64** no corpo de um JSON.
 
-Arquivos nesta pasta
-- `OVERVIEW.md` (você está aqui)
-- `API-SPEC.md` — especificação da API (endpoints, headers, payload)
-- `EXAMPLES.md` — exemplos de requests/responses
-- `SECURITY.md` — recomendações de segurança (TLS, auth, rate-limit)
+## Descrição do Método
 
-Vantagens
-- Simplicidade de integração via REST
-- Controle imediado de resposta (sync/async)
-- Compatível com firewalls e infra HTTP
+Este canal é ideal para clientes que possuem capacidade de realizar chamadas a APIs REST e preferem o transporte seguro via HTTPS.
 
-Desvantagens
-- Uploads grandes podem ser problemáticos (timeouts)
-- Necessidade de codificação Base64 aumenta ~33% o tamanho do payload
+![Métodos de Integração](../../../images/integration_methods.jpg)
 
-Modos de operação
-- Síncrono: servidor retorna validação rápida (aceito/rejeitado) e `processingId`.
-- Assíncrono: servidor retorna `202 Accepted` e `processingId`; validação ocorre em background; envio de webhook ao concluir.
+### Vantagens e Desafios
 
-Próximo: ver `API-SPEC.md` para detalhes de payload e headers.
+| Vantagem | Desafio |
+| :--- | :--- |
+| **Simplicidade**: Integração direta via REST. | **Tamanho do Payload**: A codificação Base64 aumenta o tamanho em ~33%. |
+| **Controle Imediato**: Resposta síncrona ou assíncrona. | **Timeouts**: Uploads muito grandes podem causar problemas de conexão. |
+| **Compatibilidade**: Funciona com firewalls e infraestrutura HTTP padrão. | **Consumo de Memória**: Exige decodificação no servidor. |
 
+## Estrutura da Documentação
+
+Para uma implementação completa, consulte os seguintes documentos nesta pasta:
+
+-   `API-SPEC.md`: Especificação técnica detalhada (endpoints, headers, payload).
+-   `EXAMPLES.md`: Exemplos práticos de requisições e respostas.
+-   `SECURITY.md`: Recomendações de segurança (TLS, Autenticação, Rate Limit).
+
+## Fluxo de Operação
+
+1.  **Codificação**: O cliente lê o arquivo CNAB e o converte para uma string Base64.
+2.  **Envio**: Realiza um POST para o endpoint `/v1/cnab/upload` com o JSON contendo o Base64.
+3.  **Validação**: O servidor valida o token de acesso e a integridade do payload.
+4.  **Processamento**: O arquivo é decodificado e enviado para o pipeline de validação CNAB.
+5.  **Resposta**: O servidor retorna um `202 Accepted` com o ID do processamento.
+
+## Requisitos de Segurança
+
+-   **Autenticação**: OAuth2 Client Credentials ou mTLS.
+-   **Idempotência**: Uso obrigatório do header `Idempotency-Key`.
+-   **Criptografia**: TLS 1.2 ou superior é obrigatório.
