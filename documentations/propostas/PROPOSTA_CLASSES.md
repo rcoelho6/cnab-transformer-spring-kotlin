@@ -1,45 +1,93 @@
-# Proposta de Classes (apenas nomes e responsabilidades)
+# Proposta de Classes e Responsabilidades
 
-Objetivo: listar as principais classes que podem ser implementadas para o sistema CNAB 240 usando arquitetura hexagonal.
+Este documento detalha as principais classes e interfaces propostas para o sistema de processamento de arquivos **CNAB 240**, seguindo os princípios da **Arquitetura Hexagonal**.
 
-Domain (core)
-- TransactionRecord (data class) - representa uma transação extraída do CNAB
-- CNABFile (data class) - representa o arquivo CNAB consolidado (header, batches, trailers)
-- ParserException - exceções do parser
-- DomainService (interface) - serviços de domínio (regras complexas)
+## Visão Geral das Classes
 
-Ports (interfaces)
-- IngestFilePort - interface que representa entrada de arquivo (aceita InputStream ou Path)
-- ProcessCnabPort - interface que expõe método para processar CNAB e retornar JSON/objeto
-- PusherPort - interface de saída que envia o JSON resultante (send(payload: String))
-- StoragePort - interface para salvar/arquivar arquivos recebidos
+Abaixo, apresentamos a organização das classes por camada e suas respectivas responsabilidades.
 
-Application
-- ProcessCnabUseCase - implementação do caso de uso que orquestra parsing + transformação + pusher
-- CnabDto - DTO resultante consolidado para transporte
-- UseCaseException - exceções do nível de aplicação
+```mermaid
+classDiagram
+    class TransactionRecord {
+        +String id
+        +BigDecimal amount
+        +LocalDate date
+    }
+    class CNABFile {
+        +Header header
+        +List~Batch~ batches
+        +Trailer trailer
+    }
+    class ProcessCnabUseCase {
+        +process(InputStream)
+    }
+    class Cnab240Parser {
+        +parse(String) : CNABFile
+    }
+    class PusherPort {
+        <<interface>>
+        +send(String payload)
+    }
+    
+    ProcessCnabUseCase --> Cnab240Parser
+    ProcessCnabUseCase --> PusherPort
+    Cnab240Parser ..> CNABFile
+    CNABFile *-- TransactionRecord
+```
 
-Adapters - inbound
-- RestController (Spring) - endpoint para upload/push via HTTP
-- FileWatcherJob - job que observa diretório e chama IngestFilePort
+## Detalhamento por Camada
 
-Adapters - outbound
-- HttpPusherAdapter - implementa PusherPort usando RestTemplate/WebClient
-- JmsPusherAdapter - implementa PusherPort usando JMS
-- FileStorageAdapter - implementa StoragePort para salvar arquivos localmente
-- S3StorageAdapter - implementa StoragePort para AWS S3
+### 1. Domain (Core)
 
-Parser
-- Cnab240Parser - classe que recebe linhas posicional e mapeia para TransactionRecord(s)
-- Cnab240Mapping - utilitários para mapping de posições para campos
+O núcleo do sistema contém as definições fundamentais do negócio.
 
-Infra
-- SpringConfig - configuração de beans (escolha de pusher, thread pools, etc.)
-- JacksonConfig - configuração de ObjectMapper para serialização do JSON final
-- ExceptionHandlers - ControllersAdvice para tratar erros e retornar respostas apropriadas
+| Classe | Tipo | Responsabilidade |
+| :--- | :--- | :--- |
+| `TransactionRecord` | Data Class | Representa uma transação individual extraída do CNAB. |
+| `CNABFile` | Data Class | Representa o arquivo CNAB consolidado (header, batches, trailers). |
+| `ParserException` | Exception | Exceções específicas lançadas durante o parsing do arquivo. |
+| `DomainService` | Interface | Serviços que implementam regras de negócio complexas. |
 
-Observações
-- Preferir interfaces e testes unitários para o domínio e casos de uso.
-- O parser deve ser testado exaustivamente com arquivos de exemplo (unit + integration tests).
+### 2. Ports (Interfaces)
 
+Definem os contratos de entrada e saída da aplicação.
 
+-   **Inbound Ports**:
+    -   `IngestFilePort`: Aceita a entrada de arquivos (InputStream ou Path).
+    -   `ProcessCnabPort`: Expõe o método para processar o CNAB e retornar o resultado.
+-   **Outbound Ports**:
+    -   `PusherPort`: Envia o JSON resultante para sistemas externos.
+    -   `StoragePort`: Salva ou arquiva os arquivos recebidos.
+
+### 3. Application
+
+Orquestra os casos de uso do sistema.
+
+-   `ProcessCnabUseCase`: Implementação principal que coordena o parsing, a transformação e o envio dos dados.
+-   `CnabDto`: Objeto de transferência de dados consolidado para comunicação externa.
+-   `UseCaseException`: Exceções de nível de aplicação.
+
+### 4. Adapters (Infrastructure)
+
+Implementações concretas que conectam o sistema ao mundo externo.
+
+| Tipo | Adaptador | Descrição |
+| :--- | :--- | :--- |
+| **Inbound** | `RestController` | Endpoint Spring para upload de arquivos via HTTP. |
+| **Inbound** | `FileWatcherJob` | Job que monitora diretórios e inicia o processamento. |
+| **Outbound** | `HttpPusherAdapter` | Envia dados via RestTemplate ou WebClient. |
+| **Outbound** | `JmsPusherAdapter` | Envia dados utilizando mensageria JMS. |
+| **Outbound** | `S3StorageAdapter` | Armazena arquivos no AWS S3. |
+
+### 5. Parser
+
+Responsável pela tradução técnica do formato posicional.
+
+-   `Cnab240Parser`: Classe que lê as linhas posicionais e as mapeia para objetos de domínio.
+-   `Cnab240Mapping`: Utilitários que definem as posições e tamanhos de cada campo do CNAB.
+
+## Observações Importantes
+
+-   **Testabilidade**: Priorize interfaces e testes unitários para o domínio e casos de uso.
+-   **Robustez**: O parser deve ser testado exaustivamente com diversos exemplos de arquivos CNAB.
+-   **Desacoplamento**: O núcleo não deve conhecer detalhes de frameworks como Spring ou bibliotecas de persistência.
