@@ -1,9 +1,32 @@
-# Segurança — pagamentos
+# Segurança — Pagamentos
 
-Esta pasta contém recomendações consolidadas de segurança para os canais de troca de dados de pagamentos.
+Esta seção contém as diretrizes e recomendações consolidadas de segurança para todos os canais de troca de dados de pagamentos.
 
-- `CNAB-EXCHANGE.md` — segurança para troca de arquivo CNAB com sistemas externos (SFTP, HTTP-BASE64, PUSH-NOTIFY, S3).
-- `JSON-INTERNAL.md` — segurança para troca de JSONs entre sistemas internos (webhooks internos, JMS).
+## Áreas de Foco
 
-Consulte cada arquivo para detalhes operacionais, recomendações de autenticação, autorização, & medidas adicionais.
+A segurança é dividida em dois grandes pilares, dependendo da origem e do destino dos dados:
 
+### 1. Troca de Arquivos CNAB (Externo)
+Focada na segurança entre parceiros externos e o sistema de recebimento.
+-   **[CNAB-EXCHANGE.md](CNAB-EXCHANGE.md)**
+    -   Segurança para canais como SFTP, HTTP-BASE64, PUSH-NOTIFY e Cloud Storage (S3/GCS).
+    -   Recomendações de mTLS, OAuth2 e chaves SSH.
+
+### 2. Troca de JSON (Interno)
+Focada na segurança entre microserviços e sistemas internos após o processamento do CNAB.
+-   **[JSON-INTERNAL.md](JSON-INTERNAL.md)**
+    -   Segurança para webhooks internos, mensageria JMS e comunicação REST intra-VPC.
+    -   Uso de Shared Secrets (HMAC) e TLS interno.
+
+## Recomendações Gerais
+
+Consulte cada documento para detalhes operacionais específicos, incluindo:
+-   **Autenticação e Autorização**: Como garantir a identidade das partes.
+-   **Integridade**: Uso de assinaturas e checksums.
+-   **Auditoria**: Logging e monitoramento de acessos.
+
+---
+
+![Fluxo de Segurança](../images/security_flow.jpg)
+
+*Visão geral das camadas de segurança aplicadas aos canais de pagamento.*
