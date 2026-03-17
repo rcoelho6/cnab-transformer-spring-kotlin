@@ -1,29 +1,25 @@
 package com.reicorp.cnab.transformer.infrastructure.repositories.models
 
+import com.reicorp.cnab.transformer.domain.entities.SftpConfiguration
+import com.reicorp.cnab.transformer.domain.entities.enums.RegistersType
 import com.reicorp.cnab.transformer.infrastructure.repositories.converters.EncryptedStringConverter
-import jakarta.persistence.Column
-import jakarta.persistence.Convert
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
-/**
- * Modelo JPA mapeado para a tabela [sftp_configurations].
- *
- * Os campos [clientId] e [clientSecret] são automaticamente criptografados
- * antes de serem persistidos e descriptografados ao serem lidos, via [EncryptedStringConverter].
- */
 @Entity
-@Table(name = "sftp_configurations")
-class SftpConfigModel(
+@Table(name = "file_registers")
+class FileRegisterModel(
 
     @Id
-    @Column(name = "id", nullable = false, updatable = false)
-    val id: UUID,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+
+    @Column(name = "register_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    val registerType: RegistersType,
 
     @Column(name = "client_uuid", nullable = false, unique = true, updatable = false)
     val clientUuid: UUID,
@@ -55,4 +51,18 @@ class SftpConfigModel(
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     val updatedAt: LocalDateTime? = null
-)
+) {
+
+    companion object {
+        fun fromEntity(sftpConfiguration: SftpConfiguration, registerType: RegistersType) = FileRegisterModel(
+            registerType = registerType,
+            clientUuid = sftpConfiguration.clientUuid,
+            serverAddress = sftpConfiguration.serverAddress,
+            port = sftpConfiguration.port,
+            clientId = sftpConfiguration.clientId,
+            clientSecret = sftpConfiguration.clientSecret,
+            publicCertificate = sftpConfiguration.publicCertificate,
+            remotePath = sftpConfiguration.remotePath
+        )
+    }
+}

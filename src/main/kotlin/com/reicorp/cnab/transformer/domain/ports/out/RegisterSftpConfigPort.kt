@@ -9,6 +9,6 @@ import com.reicorp.cnab.transformer.domain.entities.SftpConfiguration
  * sem conhecer detalhes de banco de dados ou JPA.
  * A implementação concreta reside em infrastructure.repositories.
  */
-interface SftpConfigRepositoryPort {
-    fun save(sftpConfiguration: SftpConfiguration): SftpConfiguration
+interface RegisterSftpConfigPort {
+    fun create(sftpConfiguration: SftpConfiguration)
 }

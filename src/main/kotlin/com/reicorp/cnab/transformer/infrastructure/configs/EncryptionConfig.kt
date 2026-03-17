@@ -28,5 +28,5 @@ class EncryptionConfig(
 ) {
 
     @Bean
-    fun textEncryptor(): TextEncryptor = Encryptors.stronger(password, salt)
+    fun textEncryptor(): TextEncryptor = Encryptors.delux(password, salt)
 }

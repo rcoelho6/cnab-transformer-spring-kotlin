@@ -1,7 +1,6 @@
 package com.reicorp.cnab.transformer.application.apis.controllers
 
-import com.reicorp.cnab.transformer.application.dtos.SftpConfigRegistrationRequest
-import com.reicorp.cnab.transformer.application.dtos.SftpConfigRegistrationResponse
+import com.reicorp.cnab.transformer.application.dtos.SftpConfigRegistrationRequestDto
 import com.reicorp.cnab.transformer.domain.ports.`in`.RegisterSftpConfigUseCase
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -18,17 +17,10 @@ class SftpConfigController(
     private val registerSftpConfigUseCase: RegisterSftpConfigUseCase
 ) {
 
-    /**
-     * Cadastra uma nova configuração de acesso SFTP para um cliente.
-     *
-     * Requer o escopo OAuth2 'sftp:write' no token Bearer.
-     */
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_sftp:write')")
-    fun register(
-        @Valid @RequestBody request: SftpConfigRegistrationRequest
-    ): ResponseEntity<SftpConfigRegistrationResponse> {
-        val response = registerSftpConfigUseCase.register(request)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+    fun register(@Valid @RequestBody request: SftpConfigRegistrationRequestDto): ResponseEntity<Void> {
+        registerSftpConfigUseCase.register(request.toEntity())
+        return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 }
