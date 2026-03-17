@@ -52,3 +52,42 @@ A organização dos pacotes em `src/main/kotlin/com/reicorp/cnab/transformer` re
 2.  Desenvolva os casos de uso em `application`.
 3.  Crie a lógica de parsing para mapear o CNAB 240.
 4.  Implemente os adaptadores necessários na camada de `infrastructure`.
+
+## Segurança (OAuth2)
+
+O projeto utiliza **Spring Security com OAuth2 Client Credentials** para proteger os endpoints de API, especialmente aqueles que lidam com dados sensíveis, como o cadastro de configurações SFTP.
+
+### Como Funciona o Fluxo Client Credentials
+
+O fluxo *Client Credentials* é ideal para comunicação máquina-a-máquina (M2M), onde não há um usuário final envolvido, mas sim um sistema cliente (ex: um backoffice ou outro microserviço) acessando a API.
+
+1. **Registro Prévio**: O sistema cliente recebe previamente um `client_id` e um `client_secret` do Authorization Server (ex: Keycloak, AWS Cognito, Auth0).
+2. **Solicitação de Token**: O cliente faz uma requisição POST para o endpoint `/token` do Authorization Server, enviando suas credenciais (geralmente via Basic Auth) e solicitando o `grant_type=client_credentials`.
+3. **Emissão do Token**: Se as credenciais forem válidas, o Authorization Server retorna um JWT (JSON Web Token) de acesso.
+4. **Acesso à API**: O cliente faz a requisição para a nossa API (ex: `POST /api/v1/sftp-configs`), incluindo o token no cabeçalho: `Authorization: Bearer <token>`.
+5. **Validação**: O Spring Security na nossa aplicação intercepta a requisição, valida a assinatura do JWT (usando a chave pública do Authorization Server) e verifica se o token não expirou e possui os escopos necessários.
+
+### Como Gerar o Token (Exemplo)
+
+Para testar localmente ou integrar sistemas, você precisará gerar o token no seu Authorization Server. Abaixo um exemplo genérico usando `curl`:
+
+```bash
+curl -X POST "https://seu-auth-server.com/oauth/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -u "seu-client-id:seu-client-secret" \
+     -d "grant_type=client_credentials" \
+     -d "scope=sftp.write"
+```
+
+A resposta será um JSON contendo o `access_token`:
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scope": "sftp.write"
+}
+```
+
+Utilize este `access_token` nas requisições para a API do CNAB Transformer.
