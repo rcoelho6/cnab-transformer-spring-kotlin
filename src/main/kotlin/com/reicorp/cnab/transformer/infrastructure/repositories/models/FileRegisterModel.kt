@@ -1,5 +1,6 @@
 package com.reicorp.cnab.transformer.infrastructure.repositories.models
 
+import com.reicorp.cnab.transformer.domain.entities.QueueConfiguration
 import com.reicorp.cnab.transformer.domain.entities.SftpConfiguration
 import com.reicorp.cnab.transformer.domain.entities.enums.RegistersType
 import com.reicorp.cnab.transformer.infrastructure.repositories.converters.EncryptedStringConverter
@@ -24,25 +25,28 @@ class FileRegisterModel(
     @Column(name = "client_uuid", nullable = false, unique = true, updatable = false)
     val clientUuid: UUID,
 
-    @Column(name = "server_address", nullable = false)
-    val serverAddress: String,
+    @Column(name = "server_address")
+    val serverAddress: String? = null,
 
-    @Column(name = "port", nullable = false)
-    val port: Int,
-
-    @Convert(converter = EncryptedStringConverter::class)
-    @Column(name = "client_id", nullable = false)
-    val clientId: String,
+    @Column(name = "port")
+    val port: Int? = null,
 
     @Convert(converter = EncryptedStringConverter::class)
-    @Column(name = "client_secret", nullable = false)
-    val clientSecret: String,
+    @Column(name = "client_id")
+    val clientId: String? = null,
+
+    @Convert(converter = EncryptedStringConverter::class)
+    @Column(name = "client_secret")
+    val clientSecret: String? = null,
 
     @Column(name = "public_certificate", columnDefinition = "TEXT")
-    val publicCertificate: String?,
+    val publicCertificate: String? = null,
 
-    @Column(name = "remote_path", nullable = false)
-    val remotePath: String,
+    @Column(name = "remote_path")
+    val remotePath: String? = null,
+
+    @Column(name = "queue_name")
+    val queueName: String? = null,
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -63,6 +67,12 @@ class FileRegisterModel(
             clientSecret = sftpConfiguration.clientSecret,
             publicCertificate = sftpConfiguration.publicCertificate,
             remotePath = sftpConfiguration.remotePath
+        )
+
+        fun fromEntity(queueConfiguration: QueueConfiguration, registerType: RegistersType) = FileRegisterModel(
+            registerType = registerType,
+            clientUuid = queueConfiguration.clientUuid,
+            queueName = queueConfiguration.queueName
         )
     }
 }
